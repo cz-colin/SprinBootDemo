@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Spring Security Example</title>
+<div th:replace="header :: header-css" />
+</head>
+<body>
+
+	<div th:replace="header :: header" />
+
+	<div class="container">
+		<div id="helloDiv">
+			<H1>Hello User</H1>
+		</div>
+		<div class="row" style="margin-top: 20px">
+			<div id="loginDiv"
+				class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+				<form onsubmit="return false" name="loginForm">
+					<fieldset>
+						<h1>Please Sign In</h1>
+
+						<div th:if="${param.error}">
+							<div class="alert alert-danger">Invalid username and
+								password.</div>
+						</div>
+						<div th:if="${param.logout}">
+							<div class="alert alert-info">You have been logged out.</div>
+						</div>
+
+						<div class="form-group">
+							<input type="text" name="mobileNumber" id="mobileNumber"
+								class="form-control input-lg" placeholder="+001111111111"
+								required="true" autofocus="true" />
+						</div>
+						<div class="row">
+							<div class="col-xs-6 col-sm-6 col-md-6">
+								<input type="submit"
+									class="btn btn-lg btn-primary btn-block btn-submit"
+									value="Sign In" />
+							</div>
+							<div class="col-xs-6 col-sm-6 col-md-6"></div>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+		</div>
+
+
+		<div id="verificationDiv" class="row"
+			style="margin-top: 20px; display: none;'">
+			<form onsubmit="return false" name="loginForm">
+				<fieldset>
+					<h1>Please Verify</h1>
+					<div class="form-group">
+						<input type="hidden" name="hMobileNumber" id="hMobileNumber" />
+					</div>
+					<div class="form-group">
+						<input type="text" name="verificationCode" id="verificationCode"
+							placeholder="Verification Code" />
+					</div>
+					<div class="row">
+						<div class="col-xs-6 col-sm-6 col-md-6">
+							<input type="submit"
+								class="btn btn-lg btn-primary btn-block btn-verify"
+								value="Sign In" />
+						</div>
+						<div class="col-xs-6 col-sm-6 col-md-6"></div>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+
+	</div>
+
+	<div th:replace="footer :: footer" />
+	<script type="text/javascript" src="../js/jquery.js">
+		
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			if (localStorage.getItem('es-authenticationtoken') != null) {
+				$("#loginDiv").css("display", "none");
+				$("#helloDiv").css("display", "block");
+			}
+		});
+		$(".btn-submit").click(function() {
+			var data = {
+				"mobileNumber" : $("#mobileNumber").val(),
+			};
+			$.ajax({
+				data : JSON.stringify(data),
+				type : 'POST',
+				url : 'api/preAuthenticateSMS',
+				dataType : 'json',
+				headers : {
+					'Accept' : 'application/json',
+					'Content-Type' : 'application/json; charset=UTF-8'
+				},
+				success : function(data) {
+					$("#verificationDiv").css("display", "block");
+					$("#hMobileNumber").val(data.mobileNumber);
+				},
+				error : function(error) {
+					alert("error");
+				}
+			});
+
+		});
+
+		$(".btn-verify").click(
+				function() {
+					var data = {
+						"username" : $("#hMobileNumber").val(),
+						"verificationCode" : $("#verificationCode").val()
+					};
+					$.ajax({
+						data : JSON.stringify(data),
+						type : 'POST',
+						url : 'api/authenticate',
+						dataType : 'json',
+						headers : {
+							'Accept' : 'application/json',
+							'Content-Type' : 'application/json; charset=UTF-8'
+						},
+						success : function(data) {
+							$("#verificationDiv").css("display", "none");
+							localStorage.setItem('es-authenticationtoken',
+									data.id_token);
+							sessionStorage.setItem('es-authenticationtoken',
+									data.id_token);
+							console.log(localStorage);
+						},
+						error : function(error) {
+							alert("error");
+						}
+					});
+
+				});
+	</script>
+
+</body>
+</html>
