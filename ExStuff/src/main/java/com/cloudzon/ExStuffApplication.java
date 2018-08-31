@@ -23,6 +23,9 @@ import com.cloudzon.config.AppProperties;
 import com.cloudzon.config.ApplicationProperties;
 import com.cloudzon.config.DefaultProfileUtil;
 
+
+//by colin
+
 @EnableConfigurationProperties({ ApplicationProperties.class, AppProperties.class })
 @SpringBootApplication
 @EnableAutoConfiguration
